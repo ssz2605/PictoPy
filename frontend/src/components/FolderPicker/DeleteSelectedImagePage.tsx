@@ -20,6 +20,7 @@ import { Filter } from 'lucide-react';
 import { MediaItem } from '@/types/Media';
 import DeleteImagesDialog from './DeleteImageDialog';
 
+// Props definition for the delete images page
 interface DeleteSelectedImageProps {
   setIsVisibleSelectedImage: (value: boolean) => void;
   onError: (title: string, err: any) => void;
@@ -35,11 +36,13 @@ const DeleteSelectedImagePage: React.FC<DeleteSelectedImageProps> = ({
 }) => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
+  // Fetch all image paths
   const { successData: response, isLoading } = usePictoQuery({
     queryFn: fetchAllImages,
     queryKey: ['all-images'],
   });
 
+  // Mutation for deleting multiple images
   const { mutate: deleteMultipleImages, isPending: isAddingImages } =
     usePictoMutation({
       mutationFn: (variables: { paths: string[]; isFromDevice: boolean }) =>
@@ -50,8 +53,10 @@ const DeleteSelectedImagePage: React.FC<DeleteSelectedImageProps> = ({
       autoInvalidateTags: ['ai-tagging-images', 'ai'],
     });
 
-  // Extract the array of image paths
+  // Get all image paths
   const allImages: string[] = response?.image_files || [];
+
+  // Toggle individual image selection
   const toggleImageSelection = (imagePath: string) => {
     setSelectedImages((prev) =>
       prev.includes(imagePath)
@@ -62,6 +67,7 @@ const DeleteSelectedImagePage: React.FC<DeleteSelectedImageProps> = ({
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
+  // Final delete function after dialog confirm
   const handleAddSelectedImages = async (isFromDevice: boolean) => {
     setOpenDialog(true);
     console.log('Selected Images = ', selectedImages);
@@ -86,6 +92,7 @@ const DeleteSelectedImagePage: React.FC<DeleteSelectedImageProps> = ({
 
   const [filterTag, setFilterTag] = useState<string>(uniqueTags[0]);
 
+  // Handle filter change and update selection
   const handleFilterTag = (value: string) => {
     setSelectedImages([]);
     setFilterTag(value);
@@ -107,14 +114,17 @@ const DeleteSelectedImagePage: React.FC<DeleteSelectedImageProps> = ({
     setSelectedImages(selectedImagesPaths);
   };
 
+  // Extract name from image path
   const getImageName = (path: string) => {
     return path.split('\\').pop() || path;
   };
 
+  // Loading state
   if (isLoading) {
     return <div>Loading images...</div>;
   }
 
+  // Empty state
   if (!Array.isArray(allImages) || allImages.length === 0) {
     return <div>No images available. Please add some images first.</div>;
   }

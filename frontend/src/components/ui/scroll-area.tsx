@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
-
 import { cn } from '@/lib/utils';
 
+// Wrapper around ScrollArea with viewport, scrollbar, and corner
 function ScrollArea({
   className,
   children,
@@ -20,12 +20,14 @@ function ScrollArea({
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
-      <ScrollAreaPrimitive.Corner />
+      <ScrollBar /> {/* Scrollbar is rendered separately */}
+      <ScrollAreaPrimitive.Corner />{' '}
+      {/* For corner overlap (if both scrollbars visible) */}
     </ScrollAreaPrimitive.Root>
   );
 }
 
+// Custom ScrollBar component with vertical/horizontal styles
 function ScrollBar({
   className,
   orientation = 'vertical',
@@ -45,6 +47,7 @@ function ScrollBar({
       )}
       {...props}
     >
+      {/* The draggable thumb inside scrollbar */}
       <ScrollAreaPrimitive.ScrollAreaThumb
         data-slot="scroll-area-thumb"
         className="bg-border relative flex-1 rounded-full"

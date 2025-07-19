@@ -39,11 +39,13 @@ const UpdateDialog: React.FC<UpdateDialogProps> = ({
   showCloseButton = true,
   onOpenChange,
 }) => {
+  // Calculate download progress percentage
   const progressPercentage =
     downloadProgress.total > 0
       ? Math.round((downloadProgress.downloaded / downloadProgress.total) * 100)
       : 0;
 
+  // Convert bytes to MB with 2 decimal precision
   const formatBytes = (bytes: number) => {
     return Math.round((bytes / 1024 / 1024) * 100) / 100;
   };
@@ -62,7 +64,7 @@ const UpdateDialog: React.FC<UpdateDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Version Information */}
+          {/* Version Info */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-sm font-medium">
@@ -107,7 +109,7 @@ const UpdateDialog: React.FC<UpdateDialogProps> = ({
             </div>
           )}
 
-          {/* Error Message */}
+          {/* Error Alert */}
           {error && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
@@ -115,7 +117,7 @@ const UpdateDialog: React.FC<UpdateDialogProps> = ({
             </Alert>
           )}
 
-          {/* Download Progress */}
+          {/* Downloading State */}
           {isDownloading && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -138,6 +140,7 @@ const UpdateDialog: React.FC<UpdateDialogProps> = ({
           )}
         </div>
 
+        {/* Footer Buttons */}
         <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
           <Button
             variant="outline"

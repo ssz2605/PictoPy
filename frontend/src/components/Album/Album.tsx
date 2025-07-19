@@ -15,16 +15,19 @@ import {
 } from '../../../api/api-functions/albums';
 
 const AlbumsView: React.FC = () => {
+  // Fetch albums using a custom query hook
   const { successData: albums, isLoading } = usePictoQuery({
     queryFn: async () => await fetchAllAlbums(false),
     queryKey: ['all-albums'],
   });
 
+  // Setup mutation hook to delete an album
   const { mutate: deleteAlbum } = usePictoMutation({
     mutationFn: deleteAlbums,
     autoInvalidateTags: ['all-albums'],
   });
 
+  // Local state for UI control
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
   const [currentAlbum, setCurrentAlbum] = useState<string | null>(null);
@@ -33,6 +36,7 @@ const AlbumsView: React.FC = () => {
     description: string;
   } | null>(null);
 
+  // Show loading screen while data is loading
   if (isLoading)
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -40,6 +44,7 @@ const AlbumsView: React.FC = () => {
       </div>
     );
 
+  // Function to handle errors and show error dialog
   const showErrorDialog = (title: string, err: unknown) => {
     setErrorDialogContent({
       title,
@@ -48,6 +53,7 @@ const AlbumsView: React.FC = () => {
     });
   };
 
+  // If no albums are found, show empty state
   if (!albums || albums.length === 0) {
     return (
       <div className="container mx-auto pb-4">
@@ -78,7 +84,8 @@ const AlbumsView: React.FC = () => {
       </div>
     );
   }
-  //these funcion works when there are albums
+
+  // Transform raw album data into structure for display
   const transformedAlbums = albums.map((album: Album) => ({
     id: album.album_name,
     title: album.album_name,
@@ -86,6 +93,7 @@ const AlbumsView: React.FC = () => {
     imageCount: album.image_paths.length,
   }));
 
+  // Handle clicking on an album — also handles hidden album logic
   const handleAlbumClick = (albumId: string) => {
     const album = albums.find((a: Album) => a.album_name === albumId);
     if (album?.is_hidden) {
@@ -100,6 +108,7 @@ const AlbumsView: React.FC = () => {
     }
   };
 
+  // Delete album and show error if deletion fails
   const handleDeleteAlbum = async (albumId: string) => {
     try {
       await deleteAlbum({ name: albumId });
@@ -111,6 +120,7 @@ const AlbumsView: React.FC = () => {
   return (
     <div className="mx-auto w-full px-2 pb-4">
       {currentAlbum ? (
+        // Show album contents if selected
         <AlbumView
           albumName={currentAlbum}
           onBack={() => {
@@ -148,12 +158,14 @@ const AlbumsView: React.FC = () => {
         </>
       )}
 
+      {/* Album creation form dialog */}
       <CreateAlbumForm
         isOpen={isCreateFormOpen}
         closeForm={() => setIsCreateFormOpen(false)}
         onError={(title, err) => showErrorDialog(title, err)}
       />
 
+      {/* Album editing dialog */}
       <EditAlbumDialog
         album={editingAlbum}
         onClose={() => setEditingAlbum(null)}
@@ -163,6 +175,7 @@ const AlbumsView: React.FC = () => {
         onError={showErrorDialog}
       />
 
+      {/* Error dialog for showing any request-related errors */}
       <ErrorDialog
         content={errorDialogContent}
         onClose={() => setErrorDialogContent(null)}

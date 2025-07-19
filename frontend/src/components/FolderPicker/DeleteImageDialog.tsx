@@ -8,10 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
+// Props for delete confirmation dialog
 interface DeleteImagesDialogProps {
-  isOpen: boolean;
-  setIsOpen: (e: boolean) => void;
-  executeDeleteImages: (e: boolean) => void;
+  isOpen: boolean; // Dialog open state
+  setIsOpen: (e: boolean) => void; // Function to close the dialog
+  executeDeleteImages: (e: boolean) => void; // Callback for delete action
 }
 
 const DeleteImagesDialog: FC<DeleteImagesDialogProps> = ({
@@ -19,6 +21,7 @@ const DeleteImagesDialog: FC<DeleteImagesDialogProps> = ({
   setIsOpen,
   executeDeleteImages,
 }) => {
+  // Handles user's choice and closes the dialog
   const handleDeleteImages = (status: boolean) => {
     executeDeleteImages(status);
     setIsOpen(false);
@@ -35,10 +38,11 @@ const DeleteImagesDialog: FC<DeleteImagesDialogProps> = ({
 
         <DialogFooter>
           <Button onClick={() => handleDeleteImages(true)}>
-            {/* {isEditing ? 'Saving...' : 'Yes'} */}
+            {/* Confirm delete */}
             Yes
           </Button>
           <Button variant="outline" onClick={() => handleDeleteImages(false)}>
+            {/* Cancel delete */}
             No
           </Button>
         </DialogFooter>

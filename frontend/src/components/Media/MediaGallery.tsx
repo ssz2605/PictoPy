@@ -22,22 +22,28 @@ export default function MediaGallery({
   type,
 }: MediaGalleryProps) {
   const currentYear = new Date().getFullYear().toString();
+
+  // UI state
   const [sortBy, setSortBy] = useState<string>('date');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [showMediaViewer, setShowMediaViewer] = useState<boolean>(false);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0);
+
+  // Pagination config
   const itemsPerPage: number = 20;
   const itemsPerRow: number = 3;
-
   const noOfPages: number[] = Array.from(
     { length: 41 },
     (_, index) => index + 10,
   );
   const [pageNo, setpageNo] = useState<number>(20);
+
+  // Sorting logic
   const sortedMedia = useMemo(() => {
     return sortMedia(mediaItems, [sortBy]);
   }, [mediaItems, sortBy]);
 
+  // Current page data
   const currentItems = useMemo(() => {
     const indexOfLastItem = currentPage * pageNo;
     const indexOfFirstItem = indexOfLastItem - pageNo;
@@ -46,19 +52,21 @@ export default function MediaGallery({
 
   const totalPages = Math.ceil(sortedMedia.length / pageNo);
 
+  // Callback for sorting
   const handleSetSortBy = useCallback((value: string) => {
     setSortBy(value);
   }, []);
 
+  // Media viewer open/close
   const openMediaViewer = useCallback((index: number) => {
     setSelectedMediaIndex(index);
     setShowMediaViewer(true);
   }, []);
-
   const closeMediaViewer = useCallback(() => {
     setShowMediaViewer(false);
   }, []);
 
+  // Handle refresh
   const handleRefreshClick = async () => {
     try {
       const result = await deleteCache();
@@ -74,10 +82,13 @@ export default function MediaGallery({
   return (
     <div className="container mx-auto w-full max-w-7xl px-4">
       <div className="dark:bg-background dark:text-foreground mx-auto px-0 pt-3 pb-12 md:px-2">
+        {/* Header */}
         <div className="mb-6 flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
           <h1 className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl dark:from-gray-100 dark:to-gray-300">
             {title || currentYear}
           </h1>
+
+          {/* Controls: Refresh + Sorting */}
           <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={() => handleRefreshClick()}
@@ -87,6 +98,7 @@ export default function MediaGallery({
               <RefreshCw className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span className="hidden text-sm md:inline">Refresh</span>
             </Button>
+
             <SortingControls
               sortBy={sortBy}
               setSortBy={handleSetSortBy}
@@ -95,6 +107,7 @@ export default function MediaGallery({
           </div>
         </div>
 
+        {/* Media Grid */}
         <MediaGrid
           mediaItems={currentItems}
           itemsPerRow={itemsPerRow}
@@ -102,6 +115,7 @@ export default function MediaGallery({
           type={type}
         />
 
+        {/* Pagination + Dropdown */}
         {totalPages >= 1 && (
           <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
             <PaginationControls
@@ -110,6 +124,7 @@ export default function MediaGallery({
               onPageChange={setCurrentPage}
             />
 
+            {/* Items per page dropdown */}
             <div className="mt-4 sm:mt-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -148,6 +163,7 @@ export default function MediaGallery({
           </div>
         )}
 
+        {/* Media Viewer Modal */}
         {showMediaViewer && (
           <MediaView
             initialIndex={selectedMediaIndex}

@@ -21,22 +21,22 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
 }) => {
   const [newAlbumName, setNewAlbumName] = useState('');
   const [newAlbumDescription, setNewAlbumDescription] = useState('');
-  const [isHidden, setIsHidden] = useState(false);
-  const [password, setPassword] = useState('');
+  const [isHidden, setIsHidden] = useState(false); // Controls visibility toggle
+  const [password, setPassword] = useState(''); // Password for hidden album
 
   const { mutate: createAlbum, isPending: isCreating } = usePictoMutation({
     mutationFn: createAlbums,
     onSuccess: (response) => {
       if (response.success) {
+        // Clear form and close if successful
         setNewAlbumName('');
         setNewAlbumDescription('');
         closeForm();
       } else {
-        console.log(response.error);
-        onError('Error Creating Album', new Error(response.error));
+        onError('Error Creating Album', new Error(response.error)); // Show error if failed
       }
     },
-    autoInvalidateTags: ['all-albums'],
+    autoInvalidateTags: ['all-albums'], // Invalidate album list cache
   });
 
   const handleCreateAlbum = async () => {
@@ -46,8 +46,9 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
           name: newAlbumName.trim(),
           description: newAlbumDescription.trim(),
           is_hidden: isHidden,
-          password: isHidden ? password : '',
+          password: isHidden ? password : '', // Only send password if hidden
         });
+        // Reset form
         setNewAlbumName('');
         setNewAlbumDescription('');
         setPassword('');
@@ -57,12 +58,14 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
         onError('Error Creating Album', err);
       }
     } else {
-      onError('Invalid Album Name', new Error('Album name cannot be empty'));
+      onError('Invalid Album Name', new Error('Album name cannot be empty')); // Validation check
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={closeForm}>
+      {' '}
+      {/* Dialog visibility */}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Album</DialogTitle>
@@ -85,7 +88,7 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
               <input
                 type="checkbox"
                 checked={isHidden}
-                onChange={() => setIsHidden(!isHidden)}
+                onChange={() => setIsHidden(!isHidden)} // Toggle hidden flag
               />
               Mark as Hidden
             </label>
@@ -94,7 +97,7 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
             <Input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)} // Password input for hidden albums
               placeholder="Enter password for hidden album"
               required
             />
@@ -103,7 +106,7 @@ const CreateAlbumForm: React.FC<CreateAlbumFormProps> = ({
         <DialogFooter>
           <Button
             onClick={handleCreateAlbum}
-            disabled={isCreating || !newAlbumName.trim()}
+            disabled={isCreating || !newAlbumName.trim()} // Disable if invalid or creating
           >
             {isCreating ? 'Creating...' : 'Create Album'}
           </Button>

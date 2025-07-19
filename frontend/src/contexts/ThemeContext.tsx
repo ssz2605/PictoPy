@@ -13,6 +13,7 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
+// Default context value
 const initialState: ThemeProviderState = {
   theme: 'system',
   setTheme: () => null,
@@ -26,13 +27,14 @@ export function ThemeProvider({
   storageKey = 'vite-ui-theme',
   ...props
 }: ThemeProviderProps) {
+  // Get theme from localStorage or fallback to default
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
 
+  // Apply theme class to <html> based on current theme
   useEffect(() => {
     const root = window.document.documentElement;
-
     root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
@@ -40,7 +42,6 @@ export function ThemeProvider({
         .matches
         ? 'dark'
         : 'light';
-
       root.classList.add(systemTheme);
       return;
     }
@@ -63,11 +64,10 @@ export function ThemeProvider({
   );
 }
 
+// Hook to access theme context
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-
   if (context === undefined)
     throw new Error('useTheme must be used within a ThemeProvider');
-
   return context;
 };

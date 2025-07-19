@@ -1,7 +1,7 @@
 import * as React from 'react';
-
 import { cn } from '@/lib/utils';
 
+// Styled textarea component with utility classes and custom props
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (
     <textarea

@@ -23,7 +23,7 @@ const SecureFolder: React.FC = () => {
   );
 
   useEffect(() => {
-    checkSecureFolderStatus();
+    checkSecureFolderStatus(); // Check if secure folder already exists
   }, []);
 
   const checkSecureFolderStatus = async () => {
@@ -40,7 +40,6 @@ const SecureFolder: React.FC = () => {
       setError("Passwords don't match");
       return;
     }
-
     if (password.length < 4) {
       setError('Password must be at least 4 characters long');
       return;
@@ -61,11 +60,8 @@ const SecureFolder: React.FC = () => {
         password,
       });
       setUnlocked(unlocked);
-      if (unlocked) {
-        loadSecureMedia();
-      } else {
-        setError('Incorrect password');
-      }
+      if (unlocked) loadSecureMedia();
+      else setError('Incorrect password');
     } catch (error) {
       setError(`Failed to unlock secure folder: ${error}`);
     }
@@ -76,11 +72,11 @@ const SecureFolder: React.FC = () => {
       const media = await invoke<SecureMedia[]>('get_secure_media', {
         password,
       });
-      const mediaWithConvertedUrls = media.map((item) => ({
+      const mediaWithUrls = media.map((item) => ({
         ...item,
         url: convertFileSrc(item.url.replace('file://', '')),
       }));
-      setSecureMedia(mediaWithConvertedUrls);
+      setSecureMedia(mediaWithUrls);
     } catch (error) {
       console.error('Failed to load secure media:', error);
     }
@@ -92,18 +88,19 @@ const SecureFolder: React.FC = () => {
 
   const handleCloseMediaView = () => {
     setSelectedMediaIndex(null);
-    loadSecureMedia(); // Reload media in case any changes were made
+    loadSecureMedia(); // Refresh after closing viewer
   };
 
   const handleRemoveFromSecureFolder = async (fileName: string) => {
     try {
       await invoke('remove_from_secure_folder', { fileName, password });
-      loadSecureMedia(); // Reload the secure media list
+      loadSecureMedia();
     } catch (error) {
       console.error('Failed to remove file from secure folder:', error);
     }
   };
 
+  // Initial folder setup screen
   if (!isSetup) {
     return (
       <div className="mx-auto h-fit w-full max-w-md py-8">
@@ -111,22 +108,23 @@ const SecureFolder: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-xl border border-gray-100 bg-white/80 p-6 shadow-lg backdrop-blur-md dark:border-gray-700 dark:bg-gray-800/90 dark:shadow-gray-900/30"
+          className="overflow-hidden rounded-xl border bg-white/80 p-6 shadow-lg backdrop-blur-md dark:border-gray-700 dark:bg-gray-800/90"
         >
           <div className="mb-6 flex flex-col items-center">
             <Shield className="mb-2 h-16 w-16 text-blue-500 dark:text-blue-400" />
-            <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
+            <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
               Set Up Secure Folder
             </h2>
           </div>
           <div className="space-y-4">
+            {/* Password Inputs */}
             <div className="relative">
               <input
                 type="password"
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white/50 px-4 py-3 text-gray-700 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200"
+                className="input-style"
               />
               <Lock className="absolute top-3 right-3 h-5 w-5 text-gray-400" />
             </div>
@@ -136,29 +134,28 @@ const SecureFolder: React.FC = () => {
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white/50 px-4 py-3 text-gray-700 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200"
+                className="input-style"
               />
               <Lock className="absolute top-3 right-3 h-5 w-5 text-gray-400" />
             </div>
+
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleSetupSecureFolder}
-              className="focus:shadow-outline w-full transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3 font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:from-blue-600 hover:to-purple-700 focus:outline-none"
+              className="primary-button"
             >
               Create Secure Folder
             </motion.button>
-            {error && (
-              <p className="rounded-lg bg-red-100 p-3 text-sm font-medium text-red-500 dark:bg-red-900/30">
-                {error}
-              </p>
-            )}
+
+            {error && <p className="error-text">{error}</p>}
           </div>
         </motion.div>
       </div>
     );
   }
 
+  // Folder is unlocked but empty
   if (unlocked && secureMedia.length === 0) {
     return (
       <div className="flex h-96 w-full items-center justify-center">
@@ -179,6 +176,7 @@ const SecureFolder: React.FC = () => {
     );
   }
 
+  // Unlock screen if folder is setup but locked
   if (secureMedia.length === 0) {
     return (
       <div className="mx-auto h-fit w-full max-w-md py-8">
@@ -186,11 +184,11 @@ const SecureFolder: React.FC = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-xl border border-gray-100 bg-white/80 p-6 shadow-lg backdrop-blur-md dark:border-gray-700 dark:bg-gray-800/90 dark:shadow-gray-900/30"
+          className="overflow-hidden rounded-xl border bg-white/80 p-6 shadow-lg backdrop-blur-md dark:border-gray-700 dark:bg-gray-800/90"
         >
           <div className="mb-6 flex flex-col items-center">
             <Shield className="mb-2 h-16 w-16 text-blue-500 dark:text-blue-400" />
-            <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
+            <h2 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
               Unlock Secure Folder
             </h2>
           </div>
@@ -201,29 +199,28 @@ const SecureFolder: React.FC = () => {
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white/50 px-4 py-3 text-gray-700 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 focus:outline-none dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-200"
+                className="input-style"
               />
               <Lock className="absolute top-3 right-3 h-5 w-5 text-gray-400" />
             </div>
+
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleUnlockSecureFolder}
-              className="focus:shadow-outline w-full transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3 font-bold text-white shadow-lg transition-all duration-300 ease-in-out hover:from-blue-600 hover:to-purple-700 focus:outline-none"
+              className="primary-button"
             >
               Unlock
             </motion.button>
-            {error && (
-              <p className="rounded-lg bg-red-100 p-3 text-sm font-medium text-red-500 dark:bg-red-900/30">
-                {error}
-              </p>
-            )}
+
+            {error && <p className="error-text">{error}</p>}
           </div>
         </motion.div>
       </div>
     );
   }
 
+  // Secure gallery view
   return (
     <div className="container mx-auto p-4">
       <div className="mb-8 flex items-center gap-3">
@@ -251,7 +248,7 @@ const SecureFolder: React.FC = () => {
               alt="Secure media"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -265,6 +262,7 @@ const SecureFolder: React.FC = () => {
           </motion.div>
         ))}
       </motion.div>
+
       {selectedMediaIndex !== null && (
         <MediaView
           initialIndex={selectedMediaIndex}

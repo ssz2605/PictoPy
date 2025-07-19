@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-dialog'; // Tauri dialog API for file selection
 import { FileIcon } from '../ui/Icons/Icons';
 
 interface FilePickerProps {
-  setFilePaths: (paths: string[]) => void;
-  multiple?: boolean;
+  setFilePaths: (paths: string[]) => void; // Callback to pass selected file paths
+  multiple?: boolean; // Whether multiple files can be selected
 }
 
 const FilePicker: React.FC<FilePickerProps> = ({
@@ -20,19 +20,19 @@ const FilePicker: React.FC<FilePickerProps> = ({
         filters: [
           {
             name: 'Image',
-            extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+            extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], // Only image formats
           },
         ],
       });
       if (selected) {
         if (Array.isArray(selected)) {
-          setFilePaths(selected);
+          setFilePaths(selected); // Pass multiple file paths
         } else if (typeof selected === 'string') {
-          setFilePaths([selected]);
+          setFilePaths([selected]); // Pass single file path
         }
       }
     } catch (error) {
-      console.error('Error picking files:', error);
+      console.error('Error picking files:', error); // Handle file picker errors
     }
   };
 

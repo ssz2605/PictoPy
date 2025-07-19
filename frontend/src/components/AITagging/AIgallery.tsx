@@ -19,6 +19,7 @@ import ProgressiveFolderLoader from '../ui/ProgressiveLoader';
 import { UserSearch } from 'lucide-react';
 import ErrorPage from '@/components/ui/ErrorPage/ErrorPage';
 
+// AIGallery component displays an AI-tagged image gallery with filtering, pagination, and folder-loading capabilities
 export default function AIGallery({
   title,
   type,
@@ -26,6 +27,7 @@ export default function AIGallery({
   title: string;
   type: 'image' | 'video';
 }) {
+  // Fetches images with tags using a custom React Query hook
   const {
     successData,
     error,
@@ -34,6 +36,8 @@ export default function AIGallery({
     queryFn: async () => await getAllImageObjects(),
     queryKey: ['ai-tagging-images', 'ai'],
   });
+
+  // Local UI and data states
   const [addedFolders, setAddedFolders] = useState<string[]>([]);
   let mediaItems = successData ?? [];
   const [filterTag, setFilterTag] = useState<string[]>([]);
@@ -50,6 +54,7 @@ export default function AIGallery({
     (_, index) => index + 10,
   );
 
+  // Filters media based on selected tags and face search results
   const filteredMediaItems = useMemo(() => {
     let filtered = mediaItems;
     if (faceSearchResults.length > 0) {
@@ -67,6 +72,7 @@ export default function AIGallery({
 
   const [pageNo, setpageNo] = useState<number>(20);
 
+  // Slices filtered items for current page
   const currentItems = useMemo(() => {
     const indexOfLastItem = currentPage * pageNo;
     const indexOfFirstItem = indexOfLastItem - pageNo;
@@ -75,23 +81,28 @@ export default function AIGallery({
 
   const totalPages = Math.ceil(filteredMediaItems.length / pageNo);
 
+  // Opens media viewer for selected item
   const openMediaViewer = useCallback((index: number) => {
     setSelectedMediaIndex(index);
     setShowMediaViewer(true);
   }, []);
 
+  // Closes the media viewer
   const closeMediaViewer = useCallback(() => {
     setShowMediaViewer(false);
   }, []);
 
+  // Updates added folder list
   const handleFolderAdded = useCallback(async (newPaths: string[]) => {
     setAddedFolders(newPaths);
   }, []);
 
+  // Reset to page 1 on tag or face search change
   useEffect(() => {
     setCurrentPage(1);
   }, [filterTag, faceSearchResults]);
 
+  // Error screen if image loading fails
   if (error) {
     return (
       <ErrorPage
@@ -111,6 +122,7 @@ export default function AIGallery({
             <div className="flex items-center">
               <h1 className="text-2xl font-bold">{title}</h1>
               {faceSearchResults.length > 0 && (
+                // UI for active face filter badge
                 <div className="ml-4 flex items-center gap-2 rounded-lg bg-blue-100 px-3 py-1 dark:bg-blue-900/30">
                   <UserSearch size={16} />
                   <span className="text-sm">
@@ -128,6 +140,8 @@ export default function AIGallery({
               )}
             </div>
           )}
+
+          {/* Tag filtering and folder adding UI */}
           <FilterControls
             setFilterTag={setFilterTag}
             mediaItems={mediaItems}
@@ -137,6 +151,8 @@ export default function AIGallery({
             setIsVisibleSelectedImage={setIsVisibleSelectedImage}
             setFaceSearchResults={setFaceSearchResults}
           />
+
+          {/* UI to add folders progressively */}
           <ProgressiveFolderLoader
             additionalFolders={addedFolders}
             setAdditionalFolders={setAddedFolders}
@@ -145,12 +161,15 @@ export default function AIGallery({
 
         {isVisibleSelectedImage && (
           <>
+            {/* Main image grid view */}
             <MediaGrid
               mediaItems={currentItems}
               itemsPerRow={itemsPerRow}
               openMediaViewer={openMediaViewer}
               type={type}
             />
+
+            {/* Pagination & page-size control */}
             <div className="relative flex items-center justify-center gap-4">
               <PaginationControls
                 currentPage={currentPage}
@@ -158,6 +177,7 @@ export default function AIGallery({
                 onPageChange={setCurrentPage}
               />
 
+              {/* Per page dropdown control */}
               <div className="absolute right-0 mt-5">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -194,6 +214,7 @@ export default function AIGallery({
           </>
         )}
 
+        {/* Loader or Media Viewer depending on state */}
         {isGeneratingTags ? (
           <LoadingScreen
             isLoading={isGeneratingTags}

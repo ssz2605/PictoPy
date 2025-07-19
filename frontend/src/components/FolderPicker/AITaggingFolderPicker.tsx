@@ -1,11 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-dialog'; // Tauri dialog API to open folder picker
 import { FolderPlus } from 'lucide-react';
+
 interface FolderPickerProps {
-  setFolderPath: (path: string[]) => void;
-  className?: string;
-  handleDeleteCache?: () => void;
+  setFolderPath: (path: string[]) => void; // Callback to set selected folders
+  className?: string; // Optional class for styling
+  handleDeleteCache?: () => void; // Optional callback to clear cache
 }
 
 const AITaggingFolderPicker: React.FC<FolderPickerProps> = ({
@@ -13,6 +14,7 @@ const AITaggingFolderPicker: React.FC<FolderPickerProps> = ({
   className,
   handleDeleteCache,
 }) => {
+  // Function to open folder picker
   const pickFolder = async () => {
     try {
       const selected = await open({
@@ -20,6 +22,7 @@ const AITaggingFolderPicker: React.FC<FolderPickerProps> = ({
         multiple: true,
         title: 'Select folders',
       });
+      // If folders are selected, update state and clear cache if needed
       if (selected && Array.isArray(selected) && selected.length > 0) {
         setFolderPath(selected);
         console.log('Selected folder:', selected);
@@ -31,6 +34,7 @@ const AITaggingFolderPicker: React.FC<FolderPickerProps> = ({
       console.error('Error picking folder:', error);
     }
   };
+
   return (
     <div className="flex w-full gap-3">
       <Button

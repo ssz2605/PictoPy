@@ -3,6 +3,7 @@ import glob
 
 
 def delete_db_files():
+    # Find all .db files in the database directory
     db_files = glob.glob("app/database/*.db")
     for db_file in db_files:
         try:

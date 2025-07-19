@@ -4,23 +4,23 @@ import { Play, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function MediaCard({ item, type }: MediaCardProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [isError, setIsError] = useState(false); // Track error state
+  const [isMuted, setIsMuted] = useState(true); // Mute/unmute video
+  const videoRef = useRef<HTMLVideoElement>(null); // Ref to control video
 
   const handleLoadComplete = () => {
-    setIsLoading(false);
+    setIsLoading(false); // Mark media as loaded
     setIsError(false);
   };
 
   const handleError = () => {
     setIsLoading(false);
-    setIsError(true);
+    setIsError(true); // Show error UI
   };
 
   const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent parent click
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
       setIsMuted(videoRef.current.muted);
@@ -28,6 +28,7 @@ export default function MediaCard({ item, type }: MediaCardProps) {
   };
 
   const handleMediaClick = () => {
+    // Play/pause video on click
     if (type === 'video' && videoRef.current) {
       if (videoRef.current.paused) {
         videoRef.current.play();
@@ -48,7 +49,8 @@ export default function MediaCard({ item, type }: MediaCardProps) {
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/30 backdrop-blur-sm">
           <div className="animate-pulse-ring flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />{' '}
+            {/* Loading spinner */}
           </div>
         </div>
       )}
@@ -58,7 +60,7 @@ export default function MediaCard({ item, type }: MediaCardProps) {
           <p className="text-white">Failed to load media</p>
           <button
             className="mt-2 rounded-lg bg-blue-500 px-4 py-2 text-white shadow-lg transition-all hover:bg-blue-600 hover:shadow-blue-500/25"
-            onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()} // Retry on error
           >
             Retry
           </button>
@@ -94,6 +96,7 @@ export default function MediaCard({ item, type }: MediaCardProps) {
             onError={handleError}
           />
 
+          {/* Overlay with play icon and mute button */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
             <Play
               className="h-16 w-16 transform text-white drop-shadow-lg transition-transform duration-300 group-hover:scale-110"
@@ -115,8 +118,10 @@ export default function MediaCard({ item, type }: MediaCardProps) {
         </>
       )}
 
+      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
+      {/* Title and description */}
       <div className="absolute bottom-0 left-0 w-full translate-y-full transform p-4 transition-transform duration-300 ease-out group-hover:translate-y-0">
         <div className="rounded-lg bg-black/70 p-3 backdrop-blur-sm">
           <h3 className="line-clamp-1 text-lg font-medium text-white">
@@ -128,6 +133,7 @@ export default function MediaCard({ item, type }: MediaCardProps) {
         </div>
       </div>
 
+      {/* Focus ring for accessibility */}
       <div className="absolute inset-0 rounded-xl ring-0 ring-blue-500/50 ring-offset-2 ring-offset-transparent transition-all duration-300 group-focus-visible:ring-2" />
     </div>
   );

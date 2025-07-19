@@ -12,12 +12,15 @@ import {
 } from '../../../api/api-functions/albums';
 import { extractThumbnailPath } from '@/hooks/useImages';
 import { useQueryClient } from '@tanstack/react-query';
+
 const AlbumView: React.FC<AlbumViewProps> = ({
   albumName,
   onBack,
   onError,
 }) => {
   const queryClient = useQueryClient();
+
+  // Fetch album data
   const {
     successData: album,
     isLoading,
@@ -26,15 +29,16 @@ const AlbumView: React.FC<AlbumViewProps> = ({
     queryFn: async () => await viewYourAlbum({ album_name: albumName || '' }),
     queryKey: ['view-album', albumName],
   });
+
+  // Remove image from album
   const { mutate: removeImage, isPending: isRemovingImage } = usePictoMutation({
     mutationFn: removeFromAlbum,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['view-album', albumName],
-      });
+      queryClient.invalidateQueries({ queryKey: ['view-album', albumName] });
       queryClient.invalidateQueries({ queryKey: ['all-albums'] });
     },
   });
+
   const [showImageSelection, setShowImageSelection] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
@@ -66,9 +70,7 @@ const AlbumView: React.FC<AlbumViewProps> = ({
       <ImageSelectionPage
         albumName={albumName}
         onClose={() => setShowImageSelection(false)}
-        onSuccess={() => {
-          setShowImageSelection(false);
-        }}
+        onSuccess={() => setShowImageSelection(false)}
         onError={onError}
       />
     );
@@ -76,15 +78,12 @@ const AlbumView: React.FC<AlbumViewProps> = ({
 
   const albumData = album as unknown as AlbumData;
 
-  // Convert all image paths to their correct source URLs
-  const convertedImagePaths = albumData.photos.map((path) => {
-    return {
-      url: convertFileSrc(path),
-      thumbnailUrl: convertFileSrc(extractThumbnailPath(path)),
-    };
-  });
+  // Convert image paths
+  const convertedImagePaths = albumData.photos.map((path) => ({
+    url: convertFileSrc(path),
+    thumbnailUrl: convertFileSrc(extractThumbnailPath(path)),
+  }));
 
-  // console.log(convertedImagePaths);
   return (
     <div className="mx-auto pt-1 pb-4">
       <div className="mb-4 flex items-center justify-between">
@@ -126,9 +125,7 @@ const AlbumView: React.FC<AlbumViewProps> = ({
         <MediaView
           initialIndex={selectedImageIndex}
           onClose={handleCloseMediaView}
-          allMedia={convertedImagePaths.map((image) => {
-            return { url: image.url };
-          })}
+          allMedia={convertedImagePaths.map((image) => ({ url: image.url }))}
           currentPage={1}
           itemsPerPage={albumData.photos.length}
           type="image"

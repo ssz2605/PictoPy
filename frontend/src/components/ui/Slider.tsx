@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
-
 import { cn } from '@/lib/utils';
 
 function Slider({
@@ -11,6 +10,7 @@ function Slider({
   max = 100,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
+  // Determine slider values (support both single and range sliders)
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -34,12 +34,14 @@ function Slider({
       )}
       {...props}
     >
+      {/* Track: base background of the slider */}
       <SliderPrimitive.Track
         data-slot="slider-track"
         className={cn(
           'bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5',
         )}
       >
+        {/* Range: filled part showing the selected range */}
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
@@ -47,6 +49,8 @@ function Slider({
           )}
         />
       </SliderPrimitive.Track>
+
+      {/* Thumb(s): draggable handle(s) */}
       {Array.from({ length: _values.length }, (_, index) => (
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"

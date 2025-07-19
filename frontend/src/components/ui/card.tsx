@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils'; // Utility to combine class names
 
-import { cn } from '@/lib/utils';
-
+// Card container
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -15,6 +15,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Card header section
 function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -28,6 +29,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Card title
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -38,6 +40,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Card description text
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -48,6 +51,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Card action area (e.g., button/icon at top right)
 function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -61,6 +65,7 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Main card content
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -71,6 +76,7 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
+// Footer section (e.g., buttons or info)
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div

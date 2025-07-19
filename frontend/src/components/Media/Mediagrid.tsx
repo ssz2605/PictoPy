@@ -1,11 +1,13 @@
 import { MediaGridProps } from '@/types/Media';
 import MediaCard from './MediaCard';
 
+// Main grid component to display all media items
 export default function MediaGrid({
   mediaItems,
   openMediaViewer,
   type,
 }: MediaGridProps) {
+  // Show placeholder when no media items are available
   if (mediaItems.length === 0) {
     return (
       <div className="flex h-96 flex-col items-center justify-center space-y-4 rounded-2xl bg-gradient-to-b from-gray-50/50 to-gray-100/50 shadow-inner dark:from-gray-900/30 dark:to-gray-800/30">
@@ -35,6 +37,7 @@ export default function MediaGrid({
     );
   }
 
+  // Helper to extract and trim file name from full path
   const getFileName = (path: string) => {
     const fileName = path.split('\\').pop()?.split('/').pop() || path;
     const extension = fileName.split('.').pop();
@@ -46,12 +49,13 @@ export default function MediaGrid({
     return fileName;
   };
 
+  // Render media grid
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
       {mediaItems.map((item, index) => (
         <div
           key={index}
-          onClick={() => openMediaViewer(index)}
+          onClick={() => openMediaViewer(index)} // Open media viewer on click
           className="group flex transform cursor-pointer flex-col gap-2 transition-all duration-300 hover:-translate-y-1"
         >
           <div className="h-48 overflow-hidden rounded-xl shadow-sm transition-shadow duration-300 group-hover:shadow-xl sm:h-56 md:h-52 lg:h-48 xl:h-44 2xl:h-56 dark:shadow-gray-900/10 dark:group-hover:shadow-gray-900/20">

@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3  # Built-in DB used for storing album data
 import json
 import bcrypt
 from app.config.settings import DATABASE_PATH
@@ -8,6 +8,7 @@ from app.utils.APIError import APIError
 from fastapi import status
 
 
+# Create the 'albums' table if it doesn't exist
 def create_albums_table():
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
@@ -27,10 +28,12 @@ def create_albums_table():
     conn.close()
 
 
+# Add a new album to the database
 def create_album(album_name, description=None, is_hidden=False, password=None):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
 
+    # Check if album already exists
     cursor.execute("SELECT COUNT(*) FROM albums WHERE album_name = ?", (album_name,))
     count = cursor.fetchone()[0]
 
@@ -40,11 +43,12 @@ def create_album(album_name, description=None, is_hidden=False, password=None):
 
     password_hash = None
     if is_hidden and password:
-        # Hash the password with bcrypt
+        # Hash the password using bcrypt if album is hidden
         password_hash = bcrypt.hashpw(
             password.encode("utf-8"), bcrypt.gensalt()
         ).decode("utf-8")
 
+    # Insert the new album with an empty image list
     cursor.execute(
         """INSERT INTO albums
         (album_name, image_ids, description, is_hidden, password_hash) 
@@ -55,6 +59,7 @@ def create_album(album_name, description=None, is_hidden=False, password=None):
     conn.close()
 
 
+# Check access to a hidden album (password-protected)
 def verify_album_access(album_name, password=None):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
@@ -77,12 +82,14 @@ def verify_album_access(album_name, password=None):
                 "Password required for hidden album", status.HTTP_401_UNAUTHORIZED
             )
 
+        # Compare password hash using bcrypt
         if not bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8")):
             raise APIError("Invalid password", status.HTTP_401_UNAUTHORIZED)
 
     return True
 
 
+# Delete an album (only if it exists)
 @album_exists
 def delete_album(album_name):
     conn = sqlite3.connect(DATABASE_PATH)
@@ -92,22 +99,25 @@ def delete_album(album_name):
     conn.close()
 
 
+# Add a photo to an album by image path
 @album_exists
 def add_photo_to_album(album_name, image_path):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
 
     image_id = get_id_from_path(image_path)
-    # print("GOT IMAGE ID", image_id, flush=True)
     if image_id is None:
         conn.close()
         raise APIError(
             f"Image '{image_path}' not found in the database", status.HTTP_404_NOT_FOUND
         )
 
+    # Fetch current image list
     cursor.execute("SELECT image_ids FROM albums WHERE album_name = ?", (album_name,))
     result = cursor.fetchone()
     image_ids = json.loads(result[0])
+
+    # Add image if not already in album
     if image_id not in image_ids:
         image_ids.append(image_id)
         cursor.execute(
@@ -118,6 +128,7 @@ def add_photo_to_album(album_name, image_path):
     conn.close()
 
 
+# Get image paths of an album (auth check for hidden albums)
 @album_exists
 def get_album_photos(album_name, password=None):
     verify_album_access(album_name, password)
@@ -135,6 +146,7 @@ def get_album_photos(album_name, password=None):
     return None
 
 
+# Remove a photo from an album
 @album_exists
 @image_exists
 def remove_photo_from_album(album_name, image_path):
@@ -148,6 +160,7 @@ def remove_photo_from_album(album_name, image_path):
             f"Image '{image_path}' not found in the database", status.HTTP_404_NOT_FOUND
         )
 
+    # Fetch and update image list
     cursor.execute("SELECT image_ids FROM albums WHERE album_name = ?", (album_name,))
     result = cursor.fetchone()
     image_ids = json.loads(result[0])
@@ -161,6 +174,7 @@ def remove_photo_from_album(album_name, image_path):
     conn.close()
 
 
+# Get all albums, optionally include hidden ones
 def get_all_albums(include_hidden=False):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
@@ -190,6 +204,7 @@ def get_all_albums(include_hidden=False):
     return albums
 
 
+# Edit an album's description
 @album_exists
 def edit_album_description(album_name, new_description):
     conn = sqlite3.connect(DATABASE_PATH)
@@ -203,6 +218,7 @@ def edit_album_description(album_name, new_description):
     conn.close()
 
 
+# Remove an image ID from all albums (used when image is deleted)
 def remove_image_from_all_albums(image_id):
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()

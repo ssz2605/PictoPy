@@ -1,4 +1,7 @@
+// React & Hooks
 import React, { useState, useRef } from 'react';
+
+// UI components from internal design system
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,12 +10,22 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+
+// Custom types
 import { MediaItem } from '@/types/Media';
+
+// Internal components
 import AITaggingFolderPicker from '../FolderPicker/AITaggingFolderPicker';
 import DeleteSelectedImagePage from '../FolderPicker/DeleteSelectedImagePage';
 import ErrorDialog from '../Album/Error';
+
+// Icons
 import { Trash2, Filter, UserSearch, Upload, Camera } from 'lucide-react';
+
+// Face search API function
 import { searchByFace } from '../../../api/api-functions/faceTagging';
+
+// Dialog components for modal behavior
 import {
   Dialog,
   DialogContent,
@@ -20,9 +33,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+
 import WebcamCapture from './WebcamCapture';
 import { LoadingScreen } from '../LoadingScreen/LoadingScreen';
 
+// Props type for the component
 interface FilterControlsProps {
   setFilterTag: (tag: string[]) => void;
   mediaItems: MediaItem[];
@@ -33,6 +48,7 @@ interface FilterControlsProps {
   setFaceSearchResults: (paths: string[]) => void;
 }
 
+// Main functional component
 export default function FilterControls({
   setFilterTag,
   mediaItems,
@@ -41,6 +57,7 @@ export default function FilterControls({
   setIsVisibleSelectedImage,
   setFaceSearchResults,
 }: FilterControlsProps) {
+  // Get unique tags from all media items
   const uniqueTags = React.useMemo(() => {
     const allTags = mediaItems.flatMap((item) => item.tags);
     return Array.from(new Set(allTags))
@@ -48,6 +65,7 @@ export default function FilterControls({
       .sort();
   }, [mediaItems]);
 
+  // State for dropdown, dialogs, loading, and camera
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [isFaceDialogOpen, setIsFaceDialogOpen] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -56,6 +74,7 @@ export default function FilterControls({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Track selected filters (including "All tags")
   const [selectedFlags, setSelectedFlags] = useState<
     { tag: string; isChecked: boolean }[]
   >([
@@ -63,18 +82,21 @@ export default function FilterControls({
     ...uniqueTags.map((ele) => ({ tag: ele, isChecked: false })),
   ]);
 
+  // Add tag to selected list
   const handleAddFlag = (idx: number) => {
     const updatedFlags = [...selectedFlags];
     updatedFlags[idx].isChecked = true;
     setSelectedFlags(updatedFlags);
   };
 
+  // Remove tag from selected list
   const handleRemoveFlag = (idx: number) => {
     const updatedFlags = [...selectedFlags];
     updatedFlags[idx].isChecked = false;
     setSelectedFlags(updatedFlags);
   };
 
+  // Apply selected tag filters
   const handleFilterFlag = () => {
     let flags: string[] = [];
     if (selectedFlags[0].isChecked) {
@@ -88,12 +110,14 @@ export default function FilterControls({
     setFilterTag(flags);
   };
 
+  // Toggle dropdown menu open/close
   const handleToggleDropdown = (event: Event) => {
     event.preventDefault();
-    setIsDropdownOpen((prevState) => !prevState); // Toggle dropdown visibility
+    setIsDropdownOpen((prevState) => !prevState);
   };
+
+  // Handle new folder added via picker
   const handleFolderPick = async (paths: string[]) => {
-    //set addiitional paths here
     try {
       await onFolderAdded(paths);
     } catch (error) {
@@ -101,11 +125,13 @@ export default function FilterControls({
     }
   };
 
+  // Error dialog state
   const [errorDialogContent, setErrorDialogContent] = useState<{
     title: string;
     description: string;
   } | null>(null);
 
+  // Show custom error dialog
   const showErrorDialog = (title: string, err: unknown) => {
     setErrorDialogContent({
       title,
@@ -114,6 +140,7 @@ export default function FilterControls({
     });
   };
 
+  // Handle file input upload for face matching
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -147,10 +174,12 @@ export default function FilterControls({
     }
   };
 
+  // Trigger hidden file input click
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
+  // Reset face search results
   const clearFaceSearch = () => {
     setFaceSearchResults([]);
     if (fileInputRef.current) {
@@ -158,6 +187,7 @@ export default function FilterControls({
     }
   };
 
+  // Handle result from camera capture
   const handleCameraCapture = (
     matchedPaths: string[],
     errorMessage?: string,
@@ -173,6 +203,7 @@ export default function FilterControls({
     setIsFaceDialogOpen(false);
   };
 
+  // Show Delete page instead of filter controls if delete view is active
   if (!isVisibleSelectedImage) {
     return (
       <div>
@@ -186,11 +217,14 @@ export default function FilterControls({
     );
   }
 
+  // Main filter and action control UI
   return (
     <>
       <div className="flex items-center gap-4 overflow-auto">
+        {/* Folder Picker */}
         <AITaggingFolderPicker setFolderPath={handleFolderPick} />
 
+        {/* Delete Images Button */}
         <Button
           onClick={() => setIsVisibleSelectedImage(false)}
           variant="outline"
@@ -200,6 +234,7 @@ export default function FilterControls({
           <p className="ml-1 hidden lg:inline">Delete Images</p>
         </Button>
 
+        {/* Sort by Face Dialog */}
         <Dialog open={isFaceDialogOpen} onOpenChange={setIsFaceDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -215,6 +250,7 @@ export default function FilterControls({
               <DialogTitle>Sort by Face</DialogTitle>
             </DialogHeader>
             <div className="mt-4 flex flex-col gap-4">
+              {/* Show loading / error / camera / upload */}
               {isSearching && <LoadingScreen />}
               {searchError && (
                 <div className="rounded-md bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200">
@@ -266,6 +302,7 @@ export default function FilterControls({
           </DialogContent>
         </Dialog>
 
+        {/* Filter by Tag Dropdown */}
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button
@@ -322,6 +359,7 @@ export default function FilterControls({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Error Dialog */}
         <ErrorDialog
           content={errorDialogContent}
           onClose={() => setErrorDialogContent(null)}
